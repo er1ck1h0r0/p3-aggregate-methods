@@ -1,4 +1,5 @@
 from datetime import datetime
+
 class Student:
     def __init__(self, name):
         self.name = name
@@ -14,12 +15,15 @@ class Student:
 
     def get_enrollments(self):
         return self._enrollments.copy()
+    
+    def course_count(self):
+        return len(self._enrollments)
 
 class Course:
     def __init__(self, title):
-
         self.title = title
         self._enrollments = []
+        self._grades = {}  # Added to manage grades
 
     def add_enrollment(self, enrollment):
         if isinstance(enrollment, Enrollment):
@@ -29,7 +33,20 @@ class Course:
 
     def get_enrollments(self):
         return self._enrollments.copy()
-
+    
+    def add_grade(self, student, grade):
+        if isinstance(student, Student):
+            self._grades[student] = grade
+        else:
+            raise TypeError("student must be an instance of Student")
+    
+    def aggregate_average_grade(self):
+        if not self._grades:
+            return None  # Return None if there are no grades
+        total_grades = sum(self._grades.values())
+        num_courses = len(self._grades)
+        average_grade = total_grades / num_courses
+        return average_grade
 
 class Enrollment:
     all = []
@@ -45,3 +62,11 @@ class Enrollment:
 
     def get_enrollment_date(self):
         return self._enrollment_date
+    
+    @classmethod
+    def aggregate_enrollments_per_day(cls):
+        enrollment_count = {}
+        for enrollment in cls.all:
+            date = enrollment.get_enrollment_date().date()
+            enrollment_count[date] = enrollment_count.get(date, 0) + 1
+        return enrollment_count
